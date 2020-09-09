@@ -144,7 +144,7 @@ module.exports = config => ({
         notes: 'Returns the logs for a step',
         tags: ['api', 'builds', 'steps', 'log'],
         auth: {
-            strategies: ['session', 'token'],
+            strategies: ['token'],
             scope: ['user', 'pipeline', 'build']
         },
         plugins: {
@@ -191,7 +191,7 @@ module.exports = config => ({
                                 maxLines
                             })
                         )
-                        .then(([lines, morePages]) =>{
+                        .then(([lines, morePages]) => {
                             if (type !== 'download') {
                                 return reply(lines).header('X-More-Data', (morePages || !isDone).toString());
                             }
@@ -199,10 +199,12 @@ module.exports = config => ({
                             let res = '';
 
                             for (let i = 0; i < lines.length; i += 1) {
-                                res = res + lines[i].m + '\n';
+                                res = `${res}${lines[i].m}\n`;
                             }
 
-                            return reply(res).type('text/plain').header('content-disposition',`attachment; filename="${stepName}-log.txt"`);
+                            return reply(res)
+                                .type('text/plain')
+                                .header('content-disposition', `attachment; filename="${stepName}-log.txt"`);
                         });
                 })
                 .catch(err => reply(boom.boomify(err)));
